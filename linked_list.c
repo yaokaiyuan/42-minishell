@@ -65,3 +65,38 @@ void clean_env_list(t_list *env_list)
 {
 	ft_lstclear(&env_list, free);
 }
+
+char **convert_env_list_to_array(t_list *env_list)
+{
+    int count = 0;
+    t_list *temp = env_list;
+    while (temp)
+    {
+        count++;
+        temp = temp->next;
+    }
+
+    char **envp = malloc((count + 1) * sizeof(char *));
+    if (!envp)
+    {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
+
+    int i = 0;
+    temp = env_list;
+    while (temp)
+    {
+        envp[i] = strdup(temp->content);
+        if (!envp[i])
+        {
+            perror("strdup");
+            exit(EXIT_FAILURE); // todo clean
+        }
+        temp = temp->next;
+        i++;
+    }
+    envp[i] = NULL;
+
+    return envp;
+}

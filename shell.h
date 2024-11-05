@@ -80,5 +80,7 @@ t_list	*init_env_list(char **envp);
 char	*ft_strtok(char* str, const char* delim);
 int 	check_quote(const char *input);
 char	*process_double_quote(const char *input);
+char 	**convert_env_list_to_array(t_list *env_list);
+char 	*strip_quotes(char *token);
 
 #endif

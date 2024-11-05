@@ -69,7 +69,7 @@ char *process_double_quote(const char *input) {
             int i = 0;
 
             // Extract the variable name
-            while (*input_ptr && (isalnum(*input_ptr) || *input_ptr == '_')) {
+            while (*input_ptr && (ft_isalnum(*input_ptr) || *input_ptr == '_')) {
                 var_name[i++] = *input_ptr++;
             }
             var_name[i] = '\0'; // Null-terminate the variable name
@@ -88,6 +88,15 @@ char *process_double_quote(const char *input) {
 
     *ptr = '\0'; // Null-terminate the result string
     return result; // Return the processed string
+}
+
+char *strip_quotes(char *token) {
+    size_t len = strlen(token);
+    if ((token[0] == '\'' && token[len - 1] == '\'') || (token[0] == '"' && token[len - 1] == '"')) {
+        token[len - 1] = '\0'; // Remove trailing quote
+        token++; // Move past leading quote
+    }
+    return token;
 }
 
 void parse_commands(t_program *program)
@@ -109,7 +118,8 @@ void parse_commands(t_program *program)
 
     while (program->tokens != NULL) // Loop until no more tokens
     {
-        if (ft_strncmp(program->tokens, "|", 1) == 0)
+		char *token = strip_quotes(program->tokens);
+        if (ft_strncmp(token, "|", 1) == 0)
         {
             // Initialize a new command for each pipe
             if (!head)
@@ -123,7 +133,7 @@ void parse_commands(t_program *program)
                 current_cmd = current_cmd->next;
             }
         }
-        else if (ft_strncmp(program->tokens, ">", 1) == 0 || ft_strncmp(program->tokens, "<", 1) == 0 || ft_strncmp(program->tokens, ">>", 2) == 0)
+        else if (ft_strncmp(token, ">", 1) == 0 || ft_strncmp(token, "<", 1) == 0 || ft_strncmp(token, ">>", 2) == 0)
         {
             // Ensure current_cmd is initialized
             if (!current_cmd) {
@@ -142,8 +152,23 @@ void parse_commands(t_program *program)
                 t_redirection *new_redirection = malloc(sizeof(t_redirection));
                 new_redirection->file = ft_strdup(program->tokens);
                 new_redirection->type = type;
-                new_redirection->next = current_cmd->redirects;
-                current_cmd->redirects = new_redirection;
+                // new_redirection->next = current_cmd->redirects;
+                // current_cmd->redirects = new_redirection;
+
+                new_redirection->next = NULL;
+                if (current_cmd->redirects == NULL)
+                {
+                    current_cmd->redirects = new_redirection;
+                }
+                else
+                {
+                    t_redirection *tmp = current_cmd->redirects;
+                    while (tmp->next != NULL)
+                    {
+                        tmp = tmp->next;
+                    }
+                    tmp->next = new_redirection;
+                }
             }
             else
             {
@@ -172,7 +197,7 @@ void parse_commands(t_program *program)
                 exit(EXIT_FAILURE); // TODO replace with clean_exit
             }
 
-            new_argv[argc] = ft_strdup(program->tokens);
+            new_argv[argc] = ft_strdup(token);
             if (!new_argv[argc]) {
                 perror("ft_strdup failed");
                 exit(EXIT_FAILURE); // TODO replace with clean_exit

@@ -6,7 +6,7 @@
 /*   By: ykai-yua <ykai-yua@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 14:20:15 by ykai-yua          #+#    #+#             */
-/*   Updated: 2024/11/05 18:45:51 by ykai-yua         ###   ########.fr       */
+/*   Updated: 2024/11/05 19:56:29 by ykai-yua         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,41 +19,52 @@ char* ft_strtok(char* str, const char* delim) {
     int in_double_quote = 0;
 
     if (str != NULL) {
-        current_position = str;  // 设置当前解析的位置
+        current_position = str;  // Set the current parsing position
     }
 
-    // 如果当前字符串已到达结尾，则返回NULL
+    // If the current string has reached the end, return NULL
     if (current_position == NULL || *current_position == '\0') {
         return NULL;
     }
 
-    // 跳过前导分隔符
+    // Skip leading delimiters
     while (*current_position && strchr(delim, *current_position) && !in_single_quote && !in_double_quote) {
         current_position++;
     }
 
-    // 如果到达了字符串结尾，则返回NULL
+    // If reached the end of the string, return NULL
     if (*current_position == '\0') {
         return NULL;
     }
 
-    // 找到token的开始位置
+    // Find the start position of the token
     token = current_position;
 
-    // 解析token，直到遇到分隔符或结束引号
-    while (*current_position && (in_single_quote || in_double_quote || !strchr(delim, *current_position))) {
+    // Handle quotes and parse the token
+    while (*current_position) {
         if (*current_position == '\'') {
-            in_single_quote = !in_single_quote;  // 切换单引号状态
+            in_single_quote = !in_single_quote;  // Toggle single quote state
+            current_position++; // Move past the quote
+            continue; // Skip the quote
         } else if (*current_position == '\"') {
-            in_double_quote = !in_double_quote;  // 切换双引号状态
+            in_double_quote = !in_double_quote;  // Toggle double quote state
+            current_position++; // Move past the quote
+            continue; // Skip the quote
         }
+
+        // If we are not in quotes and we hit a delimiter, break
+        if (!in_single_quote && !in_double_quote && strchr(delim, *current_position)) {
+            break;
+        }
+
         current_position++;
     }
 
-    // 将当前的位置设置为结束符，以便后续调用返回token
+    // Null-terminate the token
     if (*current_position) {
-        *current_position++ = '\0';  // 结束当前token，并移动到下一个字符
+        *current_position++ = '\0';  // End the current token and move to the next character
     }
 
-    return token;  // 返回token
+    // Return the token without quotes
+    return token;  
 }

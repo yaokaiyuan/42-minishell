@@ -107,6 +107,9 @@ void execute_single_command(t_command *cmd, t_list *env_list)
     }
     else
     {
+        // char **envp = convert_env_list_to_array(env_list);
+
+        // execve(cmd->argv[0], cmd->argv, envp);
         execvp(cmd->argv[0], cmd->argv);
         perror("execvp");
         exit(EXIT_FAILURE); // TODO clean
@@ -123,7 +126,7 @@ void	execute_builtin_with_redirection(t_command *cmd, t_program **program)
 	if (saved_stdout == -1 || saved_stdin == -1)
 	{
 		perror("Failed to save STDIN or STDOUT");
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO clean 
 	}
 	dup2((*program)->in_fd, 0);
 	dup2((*program)->out_fd, 1);
