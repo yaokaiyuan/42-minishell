@@ -141,16 +141,17 @@ void parse_commands(t_program *program)
                 break;
             }
             // Handle redirections
-            t_redirection_type type = (ft_strncmp(program->tokens, ">", 1) == 0) ? REDIRECT_OUT : REDIRECT_IN;
-            if (ft_strncmp(program->tokens, ">>", 2) == 0)
+            t_redirection_type type = (ft_strncmp(token, ">", 1) == 0) ? REDIRECT_OUT : REDIRECT_IN;
+            if (ft_strncmp(token, ">>", 2) == 0)
                 current_cmd->append = 1;
 
             // Get the next token for the file name
             program->tokens = ft_strtok(NULL, " ");
-            if (program->tokens != NULL)
+			token = strip_quotes(program->tokens);
+            if (token != NULL)
             {
                 t_redirection *new_redirection = malloc(sizeof(t_redirection));
-                new_redirection->file = ft_strdup(program->tokens);
+                new_redirection->file = ft_strdup(token);
                 new_redirection->type = type;
                 // new_redirection->next = current_cmd->redirects;
                 // current_cmd->redirects = new_redirection;
