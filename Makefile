@@ -1,109 +1,98 @@
-#  |  |  ___ \    \  |         |
-#  |  |     ) |  |\/ |   _  |  |  /   _ 
-# ___ __|  __/   |   |  (   |    <    __/ 
-#    _|  _____| _|  _| \__,_| _|\_\ \___|
-#                              by jcluzet
-################################################################################
-#                                     CONFIG                                   #
-################################################################################
-
 NAME        := minishell
-CC        := cc
-FLAGS    := -Wall -Wextra -Werror 
+CC          := cc
+FLAGS       := -Wall -Wextra -Werror
 ################################################################################
 #                                 PROGRAM'S SRCS                               #
 ################################################################################
 
-SRCS        :=      builtins.c \
-                          helpers.c \
-                          linked_list.c \
-                          main.c \
-                          shell.c \
-                          heredoc.c \
-						  token.c \
-                          libft/ft_atoi.c \
-                          libft/ft_bzero.c \
-                          libft/ft_calloc.c \
-                          libft/ft_isalnum.c \
-                          libft/ft_isalpha.c \
-                          libft/ft_isascii.c \
-                          libft/ft_isdigit.c \
-                          libft/ft_isprint.c \
-                          libft/ft_itoa.c \
-                          libft/ft_lstadd_back.c \
-                          libft/ft_lstadd_front.c \
-                          libft/ft_lstclear.c \
-                          libft/ft_lstdelone.c \
-                          libft/ft_lstiter.c \
-                          libft/ft_lstlast.c \
-                          libft/ft_lstmap.c \
-                          libft/ft_lstnew.c \
-                          libft/ft_lstsize.c \
-                          libft/ft_memchr.c \
-                          libft/ft_memcmp.c \
-                          libft/ft_memcpy.c \
-                          libft/ft_memmove.c \
-                          libft/ft_memset.c \
-                          libft/ft_putchar_fd.c \
-                          libft/ft_putendl_fd.c \
-                          libft/ft_putnbr_fd.c \
-                          libft/ft_putstr_fd.c \
-                          libft/ft_split.c \
-                          libft/ft_strchr.c \
-                          libft/ft_strdup.c \
-                          libft/ft_striteri.c \
-                          libft/ft_strjoin.c \
-                          libft/ft_strlcat.c \
-                          libft/ft_strlcpy.c \
-                          libft/ft_strlen.c \
-                          libft/ft_strmapi.c \
-                          libft/ft_strncmp.c \
-                          libft/ft_strnstr.c \
-                          libft/ft_strrchr.c \
-                          libft/ft_strtrim.c \
-                          libft/ft_substr.c \
-                          libft/ft_tolower.c \
-                          libft/ft_toupper.c \
-                          
-OBJS        := $(SRCS:.c=.o)
+SRCS        :=  main.c \
+                init.c \
+                parse.c \
+                quote_utils.c \
+				dquote_utils.c \
+				redirection.c \
+                tokens.c \
+                env_utils.c \
+                env_array.c \
+                heredoc.c \
+                heredoc_utils.c \
+                utils.c \
+                signals.c \
+                free_program.c \
+                execute.c \
+                execute_builtin.c \
+                execute_single_command.c \
+                execute_pipeline.c \
+                builtin_commands.c \
+                builtin_commands1.c
 
+# Directory for object files
+OBJ_DIR     := compiled
+
+# Create a list of object files with the path to the compiled directory
+OBJS        := $(addprefix $(OBJ_DIR)/, $(SRCS:.c=.o))
+
+# Create a list of dependency files (.d)
+DEPS        := $(OBJS:.o=.d)
+
+# Readline directory (check the path on your system)
 READLINE_DIR := /usr/local/opt/readline
 
-.c.o:
-	${CC} ${FLAGS} -c $< -o ${<:.c=.o}
+# Directory and file for the libft library
+LIBFT_DIR   := libft
+LIBFT_LIB   := $(LIBFT_DIR)/libft.a
+
+# Additional flags for include directories
+INCLUDES    := -I $(LIBFT_DIR)
 
 ################################################################################
 #                                  Makefile  objs                              #
 ################################################################################
 
+CLR_RMV     := \033[0m
+RED         := \033[1;31m
+GREEN       := \033[1;32m
+YELLOW      := \033[1;33m
+BLUE        := \033[1;34m
+CYAN        := \033[1;36m
+RM          := rm -f
 
-CLR_RMV		:= \033[0m
-RED		    := \033[1;31m
-GREEN		:= \033[1;32m
-YELLOW		:= \033[1;33m
-BLUE		:= \033[1;34m
-CYAN 		:= \033[1;36m
-RM		    := rm -f
+# Make the 'all' target the first in the Makefile
+all: $(NAME)
 
-${NAME}:	${OBJS}
-			@echo "$(GREEN)Compilation ${CLR_RMV}of ${YELLOW}$(NAME) ${CLR_RMV}..."
-			${CC} ${FLAGS} -o ${NAME} ${OBJS} -L ${READLINE_DIR}/lib -I ${READLINE_DIR}/include -lreadline
-			@echo "$(GREEN)$(NAME) created[0m ✔️"
+# Rule for building the main executable file
+$(NAME): $(LIBFT_LIB) $(OBJS)
+	@echo "$(GREEN)Compilation ${CLR_RMV}of ${YELLOW}$(NAME) ${CLR_RMV}..."
+	$(CC) $(FLAGS) -o $(NAME) $(OBJS) $(LIBFT_LIB) -L $(READLINE_DIR)/lib -I $(READLINE_DIR)/include -lreadline
+	@echo "$(GREEN)$(NAME) created$(CLR_RMV) ✔️"
 
-all:		${NAME}
+# Rule for creating the compiled directory
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
 
-bonus:		all
+# Rule for compiling object files into the compiled directory
+$(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
+	$(CC) $(FLAGS) $(INCLUDES) -c $< -o $@
+
+# Rule for building libft
+$(LIBFT_LIB):
+	@$(MAKE) -C $(LIBFT_DIR)
+
+bonus: all
 
 clean:
-			@ ${RM} *.o */*.o */*/*.o
-			@ echo "$(RED)Deleting $(CYAN)$(NAME) $(CLR_RMV)objs ✔️"
+	@ $(RM) $(OBJ_DIR)/*.o $(OBJ_DIR)/*.d
+	@ $(MAKE) -C $(LIBFT_DIR) clean
+	@ echo "$(RED)Deleting $(CYAN)$(NAME) $(CLR_RMV)object files ✔️"
 
-fclean:		clean
-			@ ${RM} ${NAME}
-			@ echo "$(RED)Deleting $(CYAN)$(NAME) $(CLR_RMV)binary ✔️"
+fclean: clean
+	@ $(RM) $(NAME)
+	@ $(MAKE) -C $(LIBFT_DIR) fclean
+	@ echo "$(RED)Deleting $(CYAN)$(NAME) $(CLR_RMV)binary ✔️"
 
-re:			fclean all
+re: fclean all
 
-.PHONY:		all clean fclean re
+# Include dependency files
+-include $(DEPS)
 
-
+.PHONY: all clean fclean re

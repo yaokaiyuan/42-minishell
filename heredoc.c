@@ -7,8 +7,12 @@ char	*generate_unique_filename(void)
 	char		*filename;
 
 	number = ft_itoa(i++);
+	if (!number)
+		exit(EXIT_FAILURE);
 	filename = ft_strjoin("/tmp/minishell_heredoc", number);
 	free(number);
+	if (!filename)
+		exit(EXIT_FAILURE);
 	return (filename);
 }
 
@@ -36,58 +40,37 @@ char	*get_delimiter(char *input)
 	return (delimiter);
 }
 
-int	read_and_add_line(char **content, size_t *total_len, const char *delimiter)
-{
-	char	*line;
-	size_t	del_len;
-	size_t	line_len;
-
-	line = readline("> ");
-	if (!line)
-		return (1);
-	del_len = ft_strlen(delimiter);
-	if (ft_strncmp(line, delimiter, del_len) == 0 && strlen(line) == del_len)
-	{
-		free(line);
-		return (1);
-	}
-	line_len = strlen(line);
-	*content = (char *)ft_realloc(*content, *total_len + line_len + 2);
-	ft_strlcpy(*content + *total_len, line, line_len + 1);
-	*total_len += line_len;
-	(*content)[(*total_len)++] = '\n';
-	(*content)[*total_len] = '\0';
-	free(line);
-	return (0);
-}
-
 char	*read_heredoc_input(const char *delimiter)
 {
 	char	*heredoc_content;
+	char	*line;
 	size_t	total_len;
-	int		res;
+	size_t	line_len;
 
 	heredoc_content = NULL;
 	total_len = 0;
 	while (1)
 	{
-		res = read_and_add_line(&heredoc_content, &total_len, delimiter);
-		if (res == 1)
+		line = readline("> ");
+		if (!line || (ft_strncmp(line, delimiter, ft_strlen(delimiter)) == 0))
 			break ;
-		if (res == 2)
-		{
-			free(heredoc_content);
-			return (NULL);
-		}
+		line_len = strlen(line);
+		heredoc_content = ft_realloc(heredoc_content, total_len + line_len + 2);
+		if (!heredoc_content)
+			exit(EXIT_FAILURE);
+		ft_strlcpy(heredoc_content + total_len, line, line_len + 1);
+		total_len += line_len;
+		heredoc_content[total_len++] = '\n';
+		heredoc_content[total_len] = '\0';
+		free(line);
 	}
+	free(line);
 	if (heredoc_content)
 		return (heredoc_content);
-	else
-		return (ft_strdup(""));
+	return (ft_strdup(""));
 }
 
-char	*replace_heredoc_with_filename(char *input, char *delimiter,
-		char *filename)
+char	*replace_heredoc_with_filename(char *input, char *delimiter, char *filename)
 {
 	char	*start;
 	char	*end;
@@ -106,7 +89,7 @@ char	*replace_heredoc_with_filename(char *input, char *delimiter,
 	new_input_len = ft_strlen(input) - (end - start) + ft_strlen(filename) + 5;
 	new_input = (char *)malloc(new_input_len);
 	if (!new_input)
-		return (NULL);
+		exit(EXIT_FAILURE);
 	ft_strlcpy(new_input, input, start - input + 1);
 	ft_strlcat(new_input, "< ", new_input_len);
 	ft_strlcat(new_input, filename, new_input_len);
@@ -125,6 +108,8 @@ char	*handle_heredoc(char *input)
 
 	tmp_filename = generate_unique_filename();
 	delimiter = get_delimiter(input);
+	if (!delimiter)
+		return (input);
 	heredoc_content = read_heredoc_input(delimiter);
 	if (!heredoc_content)
 	{
@@ -132,57 +117,16 @@ char	*handle_heredoc(char *input)
 		return (NULL);
 	}
 	fd = open(tmp_filename, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	if (fd < 0)
+	{
+		perror("open");
+		exit(EXIT_FAILURE);
+	}
 	write(fd, heredoc_content, ft_strlen(heredoc_content));
 	close(fd);
-	updated_input = replace_heredoc_with_filename(input, delimiter,
-			tmp_filename);
+	updated_input = replace_heredoc_with_filename(input, delimiter, tmp_filename);
 	free(delimiter);
 	free(heredoc_content);
 	free(tmp_filename);
 	return (updated_input);
-}
-
-void	check_quotes(char **ptr, int *in_single_quote, int *in_double_quote)
-{
-	if (**ptr == '\'' && !(*in_double_quote))
-		*in_single_quote = !(*in_single_quote);
-	else if (**ptr == '\"' && !(*in_single_quote))
-		*in_double_quote = !(*in_double_quote);
-}
-
-int	detect_heredoc(char **ptr, int in_single_quote, int in_double_quote)
-{
-	if (**ptr == '<' && !in_single_quote && !in_double_quote)
-	{
-		if (*(*ptr + 1) == '<')
-		{
-			*ptr += 2;
-			while (**ptr && ft_isspace(**ptr))
-				(*ptr)++;
-			if (**ptr && !ft_isspace(**ptr))
-				return (1);
-			else
-				return (0);
-		}
-	}
-	return (0);
-}
-
-int	is_heredoc(char *input)
-{
-	int	in_single_quote;
-	int	in_double_quote;
-	char	*ptr;
-
-	in_single_quote = 0;
-	in_double_quote = 0;
-	ptr = input;
-	while (*ptr)
-	{
-		check_quotes(&ptr, &in_single_quote, &in_double_quote);
-		if (detect_heredoc(&ptr, in_single_quote, in_double_quote))
-			return (1);
-		ptr++;
-	}
-	return (0);
 }
