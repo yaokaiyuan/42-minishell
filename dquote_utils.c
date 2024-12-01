@@ -45,7 +45,7 @@ int	get_expanded_length(const char *input)
 			in_double_quote = !in_double_quote;
 			length++;
 			input++;
-		}
+		}	
 		else if (*input == '$' && in_double_quote)
 		{
 			input++;
@@ -66,7 +66,6 @@ char	*handle_dollar_sign(const char **input_ptr, char *ptr)
 	char	*env_value;
 	int		i;
 
-	(*input_ptr)++;
 	i = 0;
 	while (**input_ptr && (isalnum(**input_ptr) || **input_ptr == '_'))
 	{
@@ -99,6 +98,13 @@ char	*handle_dollar(const char **input_ptr,
 			char *ptr, int in_double_quote)
 {
 	if (**input_ptr == '$' && in_double_quote)
-		ptr = handle_dollar_sign(input_ptr, ptr);
+	{
+		(*input_ptr)++;
+		if (**input_ptr && (isalnum(**input_ptr) || **input_ptr == '_'))
+			ptr = handle_dollar_sign(input_ptr, ptr);
+		else
+			*ptr++ = '$';
+	
+	}
 	return (ptr);
 }
