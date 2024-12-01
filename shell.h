@@ -64,7 +64,6 @@ t_command	*init_command(void);
 
 /* Parsing functions */
 void		parse_commands(t_program *program);
-int			check_quote(const char *input);
 int			get_env_var_length(const char **input_ptr);
 int			get_expanded_length(const char *input);
 char		*handle_dollar_sign(const char **input_ptr, char *ptr);
