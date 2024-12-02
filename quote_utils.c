@@ -14,21 +14,18 @@
 
 char *strip_quotes(char *token)
 {
-    if (token == NULL) // 检查 token 是否为 NULL
+    if (token == NULL)
         return NULL;
-
     size_t len = strlen(token);
-    if (len == 0) // 检查空字符串
-        return token; // 直接返回原始字符串
-
+    if (len == 0)
+        return token;
     size_t end = 0;
-    int in_quote = 0; // 用于跟踪是否在引号内
-    char quote_char = 0; // 用于存储当前引号类型
+    int in_quote = 0;
+    char quote_char = 0;
 
-    // 创建一个临时结果字符串
-    char *result = malloc(len + 1); // 最坏情况下，长度等于原始字符串长度
+    char *result = malloc(len + 1);
     if (!result)
-        return NULL; // 如果分配失败，返回 NULL
+        return NULL;
 
     size_t j = 0; // 用于跟踪 result 的写入位置
 
@@ -78,6 +75,7 @@ char	*process_double_quote(const char *input)
 	char		*ptr;
 	const char	*input_ptr;
 	int			in_double_quote;
+    int         in_single_quote;
 
 	result_length = get_expanded_length(input);
 	result = malloc(result_length + 1);
@@ -86,13 +84,29 @@ char	*process_double_quote(const char *input)
 	ptr = result;
 	input_ptr = input;
 	in_double_quote = 0;
+    in_single_quote = 0;
 	while (*input_ptr)
-	{
-		ptr = handle_double_quote(&input_ptr, ptr, &in_double_quote);
-		ptr = handle_dollar(&input_ptr, ptr, in_double_quote);
-		if (*input_ptr != '\"' && *input_ptr != '$')
-			*ptr++ = *input_ptr++;
-	}
+	{	
+        if (*input_ptr == '\'')
+        {
+            if (!in_single_quote) // 如果不在单引号内
+            {
+                in_single_quote = 1;
+                *ptr++ = *input_ptr++; // 复制单引号到结果
+            }
+            else // 如果已经在单引号内
+            {
+                in_single_quote = 0; // 退出单引号状态
+                *ptr++ = *input_ptr++; // 复制单引号到结果
+            }
+        }
+        else if (!in_single_quote) // 如果不在单引号内
+        {
+            ptr = handle_double_quote(&input_ptr, ptr, &in_double_quote);
+            ptr = handle_dollar(&input_ptr, ptr, in_double_quote);
+        }
+        *ptr++ = *input_ptr++; // 直接复制其他字符
+    }
 	*ptr = '\0';
 	return (result);
 }
