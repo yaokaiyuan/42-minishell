@@ -6,77 +6,106 @@
 /*   By: ykai-yua <ykai-yua@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 07:59:51 by ykai-yua          #+#    #+#             */
-/*   Updated: 2024/11/08 15:16:23 by ykai-yua         ###   ########.fr       */
+/*   Updated: 2024/12/04 19:19:32 by ykai-yua         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "shell.h"
 
-int	check_quote(const char *input)
+static void	process_quotes(char *token, size_t len
+							, char *result, int *in_quote)
 {
-	int	in_single_quote;
-	int	in_double_quote;
-
-	in_single_quote = 0;
-	in_double_quote = 0;
-	while (*input)
-	{
-		if (*input == '\'')
-			in_single_quote++;
-		else if (*input == '\"')
-			in_double_quote++;
-		input++;
-	}
-	return (in_single_quote % 2 != 0 || in_double_quote % 2 != 0);
-}
-
-static char	*strip_all_quotes(const char *token)
-{
-	size_t	len;
-	size_t	new_len;
-	char	*stripped;
-	size_t	i;
+	size_t	end;
 	size_t	j;
+	char	quote_char;
 
-	len = strlen(token);
-	new_len = 0;
-	i = 0;
-	while (i < len)
-	{
-		if (token[i] != '\'' && token[i] != '\"')
-			new_len++;
-		i++;
-	}
-	stripped = malloc(new_len + 1);
-	if (!stripped)
-		return (NULL);
+	end = 0;
 	j = 0;
-	for (i = 0; i < len; i++)
+	while (end < len)
 	{
-		if (token[i] != '\'' && token[i] != '\"')
-			stripped[j++] = token[i];
+		if (!*in_quote && (token[end] == '\'' || token[end] == '\"'))
+		{
+			*in_quote = 1;
+			quote_char = token[end];
+			end++;
+		}
+		else if (*in_quote && token[end] == quote_char)
+		{
+			*in_quote = 0;
+			end++;
+		}
+		else
+			result[j++] = token[end++];
 	}
-	stripped[j] = '\0';
-	return (stripped);
+	result[j] = '\0';
+	ft_strlcpy(token, result, j + 1);
 }
 
 char	*strip_quotes(char *token)
 {
 	size_t	len;
+	char	*result;
+	int		in_quote;
 
-	len = strlen(token);
-	if ((token[0] == '\'' && token[len - 1] == '\'')
-		|| (token[0] == '"' && token[len - 1] == '"'))
+	in_quote = 0;
+	if (token == NULL)
+		return (NULL);
+	len = ft_strlen(token);
+	if (len == 0)
+		return (token);
+	result = malloc(len + 1);
+	if (!result)
+		return (NULL);
+	process_quotes(token, len, result, &in_quote);
+	if (in_quote)
 	{
-		token[len - 1] = '\0';
-		token++;
+		free(result);
+		return (ft_strdup("minishell: unmatched quotes"));
 	}
-	else
-		token = strip_all_quotes(token);
+	free(result);
 	return (token);
 }
 
-char	*process_double_quote(const char *input)
+static char	*handle_single_quote(const char **input_ptr, char *ptr)
+{
+	if (**input_ptr == '\'')
+	{
+		*ptr++ = **input_ptr;
+		(*input_ptr)++;
+		while (**input_ptr && **input_ptr != '\'')
+			*ptr++ = **input_ptr++;
+		if (**input_ptr == '\'')
+		{
+			*ptr++ = **input_ptr;
+			(*input_ptr)++;
+		}
+	}
+	else
+		*ptr++ = **input_ptr++;
+	return (ptr);
+}
+
+static char	*handle_double_quotes(t_program *program, const char **input_ptr,
+			char *ptr, int *in_double_quote)
+{
+	if (**input_ptr == '\"')
+	{
+		*ptr++ = **input_ptr;
+		(*input_ptr)++;
+		*in_double_quote = !(*in_double_quote);
+	}
+	if (**input_ptr == '$' && in_double_quote)
+	{
+		(*input_ptr)++;
+		if (**input_ptr && (isalnum(**input_ptr) || **input_ptr == '_'))
+			ptr = handle_dollar_sign(program, input_ptr, ptr);
+		else
+			*ptr++ = '$';
+	}
+	return (ptr);
+}
+
+char	*process_double_quote(t_program *program)
 {
 	int			result_length;
 	char		*result;
@@ -84,18 +113,21 @@ char	*process_double_quote(const char *input)
 	const char	*input_ptr;
 	int			in_double_quote;
 
-	result_length = get_expanded_length(input);
+	result_length = get_expanded_length(program->input);
 	result = malloc(result_length + 1);
 	if (!result)
 		return (NULL);
 	ptr = result;
-	input_ptr = input;
+	input_ptr = program->input;
 	in_double_quote = 0;
 	while (*input_ptr)
 	{
-		ptr = handle_double_quote(&input_ptr, ptr, &in_double_quote);
-		ptr = handle_dollar(&input_ptr, ptr, in_double_quote);
-		if (*input_ptr != '\"' && *input_ptr != '$')
+		if (*input_ptr == '\'')
+			ptr = handle_single_quote(&input_ptr, ptr);
+		else if (*input_ptr == '\"')
+			ptr = handle_double_quotes(program, &input_ptr,
+					ptr, &in_double_quote);
+		else
 			*ptr++ = *input_ptr++;
 	}
 	*ptr = '\0';

@@ -6,7 +6,7 @@
 /*   By: ykai-yua <ykai-yua@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 08:00:32 by ykai-yua          #+#    #+#             */
-/*   Updated: 2024/11/08 13:45:26 by ykai-yua         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:45:49 by ykai-yua         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void	parse_commands(t_program *program)
 {
 	char	*processed_input;
 
-	processed_input = process_double_quote(program->input);
+	processed_input = process_double_quote(program);
 	if (processed_input)
 	{
 		free(program->input);

@@ -15,12 +15,6 @@ int	main(int argc, char **argv, char **envp)
 		program->input = readline("minishell> ");
 		if (!program->input)
 			break ;
-		if (check_quote(program->input))
-		{
-            ft_putstr_fd("minishell: unmatched quotes\n", STDERR_FILENO);
-            free(program->input);
-            continue ;
-        }
 		if (is_heredoc(program->input))
 		{
             input_cpy = handle_heredoc(program->input);
@@ -50,6 +44,7 @@ int	main(int argc, char **argv, char **envp)
 		if (program->tokens)
             free(program->tokens);
 		free_commands(program->commands);
+		program->commands = NULL;
 	}
 	free_program(program);
 	return (0);

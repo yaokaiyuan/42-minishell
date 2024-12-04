@@ -44,13 +44,20 @@ void	builtin_env(t_list *env_list)
 	temp = env_list;
 	while (temp)
 	{
-		ft_putendl_fd(temp->content, STDOUT_FILENO);
+		if (((char *)temp->content)[0] != '?')
+			ft_putendl_fd(temp->content, STDOUT_FILENO);
 		temp = temp->next;
 	}
 }
 
 void	builtin_exit(void)
 {
+	// TODO 2 args or more -> do nothing, exit: too many arguments
+	// TODO add the exit code as an argument: exit 123 -> $? -> 123
+	// exit Hello -> exit: hello: numeric argument required 
+		// ykai-yua@z1t1c1 ~/Desktop/minishell 
+		// % $? 
+		// zsh: command not found: 2
 	ft_putendl_fd("exit", STDOUT_FILENO);
 	exit(EXIT_SUCCESS);
 }

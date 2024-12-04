@@ -6,7 +6,7 @@
 /*   By: ykai-yua <ykai-yua@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 15:07:50 by ykai-yua          #+#    #+#             */
-/*   Updated: 2024/11/08 15:09:23 by ykai-yua         ###   ########.fr       */
+/*   Updated: 2024/12/04 17:58:28 by ykai-yua         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,15 +64,11 @@ t_command	*init_command(void);
 
 /* Parsing functions */
 void		parse_commands(t_program *program);
-int			check_quote(const char *input);
 int			get_env_var_length(const char **input_ptr);
 int			get_expanded_length(const char *input);
-char		*handle_dollar_sign(const char **input_ptr, char *ptr);
-char		*handle_double_quote(const char **input_ptr,
-				char *ptr, int *in_double_quote);
-char		*handle_dollar(const char **input_ptr,
-				char *ptr, int in_double_quote);
-char		*process_double_quote(const char *input);
+char		*handle_dollar_sign(t_program *program, const char **input_ptr, char *ptr);
+// char		*process_double_quote(const char *input);
+char		*process_double_quote(t_program *program);
 char		*strip_quotes(char *token);
 char		*ft_strtok(char *str, const char *delim);
 
@@ -105,6 +101,7 @@ void		handle_redirection_token(t_program *program, t_command *current_cmd,
 /* Environment variables */
 t_list		*init_env_list(char **envp);
 void		add_env_var(t_list **env_list, const char *var);
+void		set_env_var(t_list **env_list, const char *key, const char *value);
 void		remove_env_var(t_list **env_list, const char *key);
 void		clean_env_list(t_list *env_list);
 char		*get_env_value(t_list *env_list, const char *key);

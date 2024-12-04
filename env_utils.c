@@ -16,20 +16,31 @@ t_list	*init_env_list(char **envp)
 		ft_lstadd_back(&env_list, new_node);
 		i++;
 	}
-	add_env_var(&env_list, "?=0");
+	set_env_var(&env_list, "?", "0");
 	return (env_list);
 }
 
 void	add_env_var(t_list **env_list, const char *var)
 {
 	t_list	*new_node;
+	char		*tmp;
 
+	if (ft_strchr(var, '=')) {
+		tmp = ft_substr(var, 0, ft_strchr(var, '=') - var);
+		if (!tmp)
+			exit(EXIT_FAILURE); // TODO free and exit
+		remove_env_var(env_list, tmp);
+		free(tmp);
+	} else {
+		remove_env_var(env_list, var);
+	}
 	new_node = ft_lstnew(ft_strdup(var));
 	if (!new_node || !new_node->content)
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO free and exit
 	ft_lstadd_back(env_list, new_node);
 }
 
+// TODO FIX HERE!
 void	remove_env_var(t_list **env_list, const char *key)
 {
 	t_list	*current;
@@ -41,8 +52,7 @@ void	remove_env_var(t_list **env_list, const char *key)
 	key_len = ft_strlen(key);
 	while (current)
 	{
-		if (ft_strncmp(current->content, key, key_len) == 0 &&
-			((char *)current->content)[key_len] == '=')
+		if (ft_strncmp(current->content, key, key_len) == 0)
 		{
 			if (prev)
 				prev->next = current->next;

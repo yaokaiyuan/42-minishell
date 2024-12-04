@@ -31,16 +31,17 @@ void	*ft_realloc(void *ptr, size_t size)
 
 void	ft_free_array(char **arr)
 {
-	char	**tmp;
+	int	i;
 
-	tmp = arr;
-	while (*arr)
+	if (!arr)
+		return;
+	i = 0;
+	while (arr[i])
 	{
-		if (*arr)
-			free(*arr);
-		arr++;
+		free(arr[i]);
+		i++;
 	}
-	free(tmp);
+	free(arr);
 }
 
 void	free_redirections(t_redirection *redirects)
@@ -70,7 +71,8 @@ void	free_commands(t_command *commands)
 		if (current->argv)
 			ft_free_array(current->argv);
 		free_redirections(current->redirects);
-		free(current);
+		if (current)
+			free(current);
 		current = next;
 	}
 }
