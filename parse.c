@@ -6,7 +6,7 @@
 /*   By: ykai-yua <ykai-yua@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 08:00:32 by ykai-yua          #+#    #+#             */
-/*   Updated: 2024/11/26 17:45:49 by ykai-yua         ###   ########.fr       */
+/*   Updated: 2024/12/12 18:51:46 by ykai-yua         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,11 @@ void	parse_tokens(t_program *program)
 	while (program->tokens)
 	{
 		token = strip_quotes(program->tokens);
-		if (ft_strncmp(token, "|", 1) == 0)
+		if (ft_strncmp(token, "|", 2) == 0)
 			current_cmd = init_new_command(&head, &current_cmd);
-		else if (ft_strncmp(token, ">", 1) == 0
-			|| ft_strncmp(token, "<", 1) == 0
-			|| ft_strncmp(token, ">>", 2) == 0)
+		else if (ft_strncmp(token, ">", 2) == 0
+			|| ft_strncmp(token, "<", 2) == 0
+			|| ft_strncmp(token, ">>", 3) == 0)
 			handle_redirection_token(program, current_cmd, token);
 		else
 			process_token(&current_cmd, token, &head);
@@ -83,12 +83,16 @@ void	parse_tokens(t_program *program)
 void	parse_commands(t_program *program)
 {
 	char	*processed_input;
+	char	*redirections_processed;
 
 	processed_input = process_double_quote(program);
 	if (processed_input)
 	{
+		redirections_processed
+			= process_redirections_outside_quotes(processed_input);
+		free(processed_input);
 		free(program->input);
-		program->input = processed_input;
+		program->input = redirections_processed;
 	}
 	program->tokens = ft_strtok(program->input, " ");
 	if (!program->tokens)

@@ -8,6 +8,7 @@ void	handle_input_redirection(t_redirection *current_redirection)
 	if (fd < 0)
 	{
 		perror(current_redirection->file);
+		return ;
 		exit(EXIT_FAILURE);
 	}
 	if (dup2(fd, 0) == -1)
@@ -18,14 +19,17 @@ void	handle_input_redirection(t_redirection *current_redirection)
 	close(fd);
 }
 
-void	handle_output_redirection(t_redirection *current_redirection, int append)
+void	handle_output_redirection(
+	t_redirection *current_redirection, int append)
 {
 	int	fd;
 
 	if (append)
-		fd = open(current_redirection->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		fd = open(
+				current_redirection->file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else
-		fd = open(current_redirection->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		fd = open(
+				current_redirection->file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0)
 	{
 		perror(current_redirection->file);

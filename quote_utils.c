@@ -6,7 +6,7 @@
 /*   By: ykai-yua <ykai-yua@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 07:59:51 by ykai-yua          #+#    #+#             */
-/*   Updated: 2024/12/04 19:19:32 by ykai-yua         ###   ########.fr       */
+/*   Updated: 2024/12/12 18:25:16 by ykai-yua         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,69 +66,34 @@ char	*strip_quotes(char *token)
 	return (token);
 }
 
-static char	*handle_single_quote(const char **input_ptr, char *ptr)
-{
-	if (**input_ptr == '\'')
-	{
-		*ptr++ = **input_ptr;
-		(*input_ptr)++;
-		while (**input_ptr && **input_ptr != '\'')
-			*ptr++ = **input_ptr++;
-		if (**input_ptr == '\'')
-		{
-			*ptr++ = **input_ptr;
-			(*input_ptr)++;
-		}
-	}
-	else
-		*ptr++ = **input_ptr++;
-	return (ptr);
-}
-
-static char	*handle_double_quotes(t_program *program, const char **input_ptr,
-			char *ptr, int *in_double_quote)
-{
-	if (**input_ptr == '\"')
-	{
-		*ptr++ = **input_ptr;
-		(*input_ptr)++;
-		*in_double_quote = !(*in_double_quote);
-	}
-	if (**input_ptr == '$' && in_double_quote)
-	{
-		(*input_ptr)++;
-		if (**input_ptr && (isalnum(**input_ptr) || **input_ptr == '_'))
-			ptr = handle_dollar_sign(program, input_ptr, ptr);
-		else
-			*ptr++ = '$';
-	}
-	return (ptr);
-}
-
 char	*process_double_quote(t_program *program)
 {
-	int			result_length;
 	char		*result;
+	const char	*input;
 	char		*ptr;
-	const char	*input_ptr;
 	int			in_double_quote;
+	int			in_single_quote;
 
-	result_length = get_expanded_length(program->input);
-	result = malloc(result_length + 1);
+	input = program->input;
+	result = malloc(get_expanded_length(program->input) + 1);
 	if (!result)
-		return (NULL);
+		exit(EXIT_FAILURE);
 	ptr = result;
-	input_ptr = program->input;
 	in_double_quote = 0;
-	while (*input_ptr)
+	in_single_quote = 0;
+	while (*input)
 	{
-		if (*input_ptr == '\'')
-			ptr = handle_single_quote(&input_ptr, ptr);
-		else if (*input_ptr == '\"')
-			ptr = handle_double_quotes(program, &input_ptr,
-					ptr, &in_double_quote);
-		else
-			*ptr++ = *input_ptr++;
+		if (*input == '\"' && !in_single_quote)
+			in_double_quote = !in_double_quote;
+		else if (*input == '\'' && !in_double_quote)
+			in_single_quote = !in_single_quote;
+		else if (*input == '$' && !in_single_quote)
+		{
+			input++;
+			ptr = handle_dollar_sign(program, &input, ptr);
+			continue ;
+		}
+		*ptr++ = *input++;
 	}
 	*ptr = '\0';
 	return (result);

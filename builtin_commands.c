@@ -50,14 +50,43 @@ void	builtin_env(t_list *env_list)
 	}
 }
 
-void	builtin_exit(void)
+static int	ft_is_numeric_string(char *str)
 {
-	// TODO 2 args or more -> do nothing, exit: too many arguments
-	// TODO add the exit code as an argument: exit 123 -> $? -> 123
-	// exit Hello -> exit: hello: numeric argument required 
-		// ykai-yua@z1t1c1 ~/Desktop/minishell 
-		// % $? 
-		// zsh: command not found: 2
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+void	builtin_exit(char **args)
+{
+	int	exit_code;
+
+	if (args[1] && args[2])
+	{
+		ft_putendl_fd("exit: too many arguments", STDERR_FILENO);
+		return ;
+	}
+	if (args[1])
+	{
+		if (!ft_is_numeric_string(args[1]))
+		{
+			ft_putstr_fd("exit: ", STDERR_FILENO);
+			ft_putstr_fd(args[1], STDERR_FILENO);
+			ft_putendl_fd(": numeric argument required", STDERR_FILENO);
+			return ;
+		}
+		else
+			exit_code = ft_atoi(args[1]);
+	}
+	else
+		exit_code = EXIT_SUCCESS;
 	ft_putendl_fd("exit", STDOUT_FILENO);
-	exit(EXIT_SUCCESS);
+	exit(exit_code);
 }

@@ -45,7 +45,6 @@ char	*read_heredoc_input(const char *delimiter)
 	char	*heredoc_content;
 	char	*line;
 	size_t	total_len;
-	size_t	line_len;
 
 	heredoc_content = NULL;
 	total_len = 0;
@@ -54,14 +53,8 @@ char	*read_heredoc_input(const char *delimiter)
 		line = readline("> ");
 		if (!line || (ft_strncmp(line, delimiter, ft_strlen(delimiter)) == 0))
 			break ;
-		line_len = strlen(line);
-		heredoc_content = ft_realloc(heredoc_content, total_len + line_len + 2);
-		if (!heredoc_content)
-			exit(EXIT_FAILURE);
-		ft_strlcpy(heredoc_content + total_len, line, line_len + 1);
-		total_len += line_len;
-		heredoc_content[total_len++] = '\n';
-		heredoc_content[total_len] = '\0';
+		heredoc_content = append_line_to_heredoc_content(
+				heredoc_content, line, &total_len);
 		free(line);
 	}
 	free(line);
@@ -70,7 +63,8 @@ char	*read_heredoc_input(const char *delimiter)
 	return (ft_strdup(""));
 }
 
-char	*replace_heredoc_with_filename(char *input, char *delimiter, char *filename)
+char	*replace_heredoc_with_filename(
+	char *input, char *delimiter, char *filename)
 {
 	char	*start;
 	char	*end;
@@ -103,7 +97,6 @@ char	*handle_heredoc(char *input)
 	char	*delimiter;
 	char	*heredoc_content;
 	char	*tmp_filename;
-	int		fd;
 	char	*updated_input;
 
 	tmp_filename = generate_unique_filename();
@@ -116,15 +109,9 @@ char	*handle_heredoc(char *input)
 		free(delimiter);
 		return (NULL);
 	}
-	fd = open(tmp_filename, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-	if (fd < 0)
-	{
-		perror("open");
-		exit(EXIT_FAILURE);
-	}
-	write(fd, heredoc_content, ft_strlen(heredoc_content));
-	close(fd);
-	updated_input = replace_heredoc_with_filename(input, delimiter, tmp_filename);
+	write_heredoc_to_file(tmp_filename, heredoc_content);
+	updated_input = replace_heredoc_with_filename(
+			input, delimiter, tmp_filename);
 	free(delimiter);
 	free(heredoc_content);
 	free(tmp_filename);

@@ -6,7 +6,7 @@
 /*   By: ykai-yua <ykai-yua@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 10:56:26 by ykai-yua          #+#    #+#             */
-/*   Updated: 2024/12/04 17:57:05 by ykai-yua         ###   ########.fr       */
+/*   Updated: 2024/12/12 18:17:13 by ykai-yua         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ int	get_env_var_length(const char **input_ptr)
 	int		i;
 	char	*env_value;
 
+	if (**input_ptr == ' ' || **input_ptr == '\0' || **input_ptr == '\"')
+		return (1);
 	i = 0;
 	while (**input_ptr && (ft_isalnum(**input_ptr) || **input_ptr == '_'))
 	{
@@ -60,12 +62,18 @@ int	get_expanded_length(const char *input)
 	return (length);
 }
 
-char	*handle_dollar_sign(t_program *program, const char **input_ptr, char *ptr)
+char	*handle_dollar_sign(t_program *program
+						, const char **input_ptr, char *ptr)
 {
 	char	var_name[256];
 	char	*env_value;
 	int		i;
 
+	if (**input_ptr == ' ' || **input_ptr == '\0' || **input_ptr == '\"')
+	{
+		*ptr = '$';
+		return (ptr + 1);
+	}
 	i = 0;
 	while (**input_ptr && (ft_isalnum(**input_ptr) || **input_ptr == '_'))
 	{

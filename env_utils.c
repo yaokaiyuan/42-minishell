@@ -20,27 +20,30 @@ t_list	*init_env_list(char **envp)
 	return (env_list);
 }
 
+// TODO free and exit on exit
 void	add_env_var(t_list **env_list, const char *var)
 {
-	t_list	*new_node;
+	t_list		*new_node;
 	char		*tmp;
 
-	if (ft_strchr(var, '=')) {
+	if (ft_strchr(var, '='))
+	{
 		tmp = ft_substr(var, 0, ft_strchr(var, '=') - var);
 		if (!tmp)
-			exit(EXIT_FAILURE); // TODO free and exit
+			exit(EXIT_FAILURE);
 		remove_env_var(env_list, tmp);
 		free(tmp);
-	} else {
+	}
+	else
+	{
 		remove_env_var(env_list, var);
 	}
 	new_node = ft_lstnew(ft_strdup(var));
 	if (!new_node || !new_node->content)
-		exit(EXIT_FAILURE); // TODO free and exit
+		exit(EXIT_FAILURE);
 	ft_lstadd_back(env_list, new_node);
 }
 
-// TODO FIX HERE!
 void	remove_env_var(t_list **env_list, const char *key)
 {
 	t_list	*current;
@@ -52,7 +55,10 @@ void	remove_env_var(t_list **env_list, const char *key)
 	key_len = ft_strlen(key);
 	while (current)
 	{
-		if (ft_strncmp(current->content, key, key_len) == 0)
+		if ((!ft_strchr(key, '=')
+				&& ft_strncmp(current->content, key, key_len) == 0)
+			|| (ft_strchr(key, '=')
+				&& ft_strncmp(current->content, key, key_len + 1) == 0))
 		{
 			if (prev)
 				prev->next = current->next;
@@ -80,8 +86,8 @@ char	*get_env_value(t_list *env_list, const char *key)
 	key_len = strlen(key);
 	while (temp)
 	{
-		if (ft_strncmp(temp->content, key, key_len) == 0 &&
-			((char *)temp->content)[key_len] == '=')
+		if (ft_strncmp(temp->content, key, key_len) == 0
+			&& ((char *)temp->content)[key_len] == '=')
 			return (((char *)temp->content) + key_len + 1);
 		temp = temp->next;
 	}

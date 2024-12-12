@@ -1,0 +1,35 @@
+// kyle
+echo "exit_code ->$? user ->$USER home -> $HOME"
+expected should print all the values including exit_code user and home
+
+echo $?
+expected to be exit_code
+
+echo $?HELLO 
+bash output = (0HELLO)
+
+// ars
+export A- 
+export HELLO-=123 
+export = 
+bash exit code = 1
+bash error = ( not a valid identifier)
+
+cd $PWD
+DOES NOT EXIST ON CREATION
+
+exit +- cases
+
+exit *any_word*
+expected exit code = 2
+
+ADD space after and before redirections if needed
+e.g.
+echo <"something"
+will turn into
+echo < "something"
+
+cat <"1""2""3""4""5"
+
+REDIRECT ON MISSING leads to nothing
+cat < missing 

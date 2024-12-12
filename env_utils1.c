@@ -1,14 +1,15 @@
 #include "shell.h"
 
-void set_env_var(t_list **env_list, const char *key, const char *value)
+// TODO free and exit on exit
+void	set_env_var(t_list **env_list, const char *key, const char *value)
 {
-	size_t len;
-	char *tmp;
+	size_t	len;
+	char	*tmp;
 
 	len = ft_strlen(key) + ft_strlen(value) + 2;
 	tmp = malloc(len);
 	if (!tmp)
-		exit(EXIT_FAILURE); // TODO free and exit
+		exit(EXIT_FAILURE);
 	ft_strlcpy(tmp, key, len);
 	ft_strlcat(tmp, "=", len);
 	ft_strlcat(tmp, value, len);

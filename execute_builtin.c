@@ -2,6 +2,8 @@
 
 void	execute_builtin_command(t_command *cmd, t_list *env_list)
 {
+	char	*exit_status;
+
 	if (ft_strncmp(cmd->argv[0], "echo", 5) == 0)
 		builtin_echo(cmd->argv);
 	else if (ft_strncmp(cmd->argv[0], "cd", 3) == 0)
@@ -15,10 +17,10 @@ void	execute_builtin_command(t_command *cmd, t_list *env_list)
 	else if (ft_strncmp(cmd->argv[0], "env", 4) == 0)
 		builtin_env(env_list);
 	else if (ft_strncmp(cmd->argv[0], "exit", 5) == 0)
-		builtin_exit();
+		builtin_exit(cmd->argv);
 	else if (ft_strncmp(cmd->argv[0], "$?", 3) == 0)
 	{
-		char *exit_status = get_env_value(env_list, "?");
+		exit_status = get_env_value(env_list, "?");
 		if (exit_status)
 			printf("minishell: %s\n", exit_status);
 		else
@@ -26,6 +28,7 @@ void	execute_builtin_command(t_command *cmd, t_list *env_list)
 	}
 }
 
+// TODO free and exit on exit
 void	execute_builtin_with_redirection(t_command *cmd, t_program **program)
 {
 	int	saved_stdout;
@@ -36,7 +39,7 @@ void	execute_builtin_with_redirection(t_command *cmd, t_program **program)
 	if (saved_stdout == -1 || saved_stdin == -1)
 	{
 		perror("Failed to save STDIN or STDOUT");
-		exit(EXIT_FAILURE); // TODO clean 
+		exit(EXIT_FAILURE);
 	}
 	dup2((*program)->in_fd, 0);
 	dup2((*program)->out_fd, 1);
