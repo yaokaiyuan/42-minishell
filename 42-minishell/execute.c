@@ -8,6 +8,7 @@ void	handle_input_redirection(t_redirection *current_redirection)
 	if (fd < 0)
 	{
 		perror(current_redirection->file);
+		return ;
 		exit(EXIT_FAILURE);
 	}
 	if (dup2(fd, 0) == -1)

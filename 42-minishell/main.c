@@ -44,6 +44,7 @@ int	main(int argc, char **argv, char **envp)
 		if (program->tokens)
             free(program->tokens);
 		free_commands(program->commands);
+		program->commands = NULL;
 	}
 	free_program(program);
 	return (0);

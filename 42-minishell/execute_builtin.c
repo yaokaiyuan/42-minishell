@@ -15,7 +15,7 @@ void	execute_builtin_command(t_command *cmd, t_list *env_list)
 	else if (ft_strncmp(cmd->argv[0], "env", 4) == 0)
 		builtin_env(env_list);
 	else if (ft_strncmp(cmd->argv[0], "exit", 5) == 0)
-		builtin_exit();
+		builtin_exit(cmd->argv);
 	else if (ft_strncmp(cmd->argv[0], "$?", 3) == 0)
 	{
 		char *exit_status = get_env_value(env_list, "?");

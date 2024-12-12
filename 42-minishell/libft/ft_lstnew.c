@@ -6,12 +6,13 @@
 /*   By: aradosla <aradosla@student.42bangkok.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/21 09:55:53 by aradosla          #+#    #+#             */
-/*   Updated: 2024/02/21 10:42:03 by aradosla         ###   ########.fr       */
+/*   Updated: 2024/11/27 17:27:30 by aradosla         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
+#include <stdio.h>
 t_list	*ft_lstnew(void *content)
 {
 	t_list	*new_list;
