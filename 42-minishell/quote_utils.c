@@ -84,7 +84,7 @@ static char	*handle_double_quotes(t_program *program, const char **input_ptr,
 		if (**input_ptr && (ft_isalnum(**input_ptr) || **input_ptr == '_'))
 			ptr = handle_dollar_sign(program, input_ptr, ptr);
 		else
-			*ptr = '$';
+			*ptr++ = '$';
 	}
 	return (ptr);
 }
